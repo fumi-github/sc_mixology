@@ -149,6 +149,36 @@ linnorm_norm = function(sce){
   return(sce)
 }
 
+linnormRaw_norm = function(sce){
+  tp = system.time({
+  logcounts(sce) = log2(Linnorm.Norm(counts(sce), output="Raw")+1)
+  })
+  
+  method_name = "LinnormRaw"
+  method_type = "norm"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce)
+}
+
+linnormXPM_norm = function(sce){
+  tp = system.time({
+  logcounts(sce) = log2(Linnorm.Norm(counts(sce), output="XPM")+1)
+  })
+  
+  method_name = "LinnormXPM"
+  method_type = "norm"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce)
+}
+
 SCnorm_norm = function(sce){
   tp = system.time({
     try_res = try({
@@ -202,15 +232,33 @@ scone_norm = function(sce){
   return(sce)
 }
 
+log2_norm = function(sce){
+  tp = system.time({
+  logcounts(sce) = log2(counts(sce) + 1)
+  })
+  
+  method_name = "log2"
+  method_type = "norm"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce)
+}
+
 norm_method <- list(
-    none = raw_count,
-    scran = scran_norm,
-    DESeq2=DESeq2_norm,
-    TMM=TMM_norm,
-    logCPM=logCPM_norm,
-    Linnorm=linnorm_norm,
-    scone=scone_norm,
-    SCnorm=SCnorm_norm
+  none = raw_count,
+  scran = scran_norm,
+  DESeq2=DESeq2_norm,
+  TMM=TMM_norm,
+  logCPM=logCPM_norm,
+  Linnorm=linnorm_norm,
+  LinnormRaw=linnormRaw_norm,
+  LinnormXPM=linnormXPM_norm,
+  scone=scone_norm,
+  SCnorm=SCnorm_norm,
+  log2=log2_norm
 )
 ```
 
