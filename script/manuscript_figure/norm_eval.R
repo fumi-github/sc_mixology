@@ -14,8 +14,9 @@ scran_high_var = function(sce,topn=1000){
   if(max(logcounts(sce)>100)){
     logcounts(sce) = log2(logcounts(sce)+1)
   }
-  var.fit <- trendVar(sce, method="loess", use.spikes=FALSE)
-  var.out <- decomposeVar(sce, var.fit)
+  # var.fit <- trendVar(sce, method="loess", use.spikes=FALSE)
+  # var.out <- decomposeVar(sce, var.fit)
+  var.out <- modelGeneVar(sce)
   hvg.out <- var.out[order(var.out$bio, decreasing=TRUE)[1:topn], ]
   rowData(sce)$hi_var = FALSE
   rowData(sce)$hi_var[rownames(rowData(sce)) %in% rownames(hvg.out)] = TRUE
