@@ -11,7 +11,7 @@ library(R.utils)
 MAX_TIME = 60*120
 set_cellbench_threads(nthreads = 1)
 
-log_file =paste("log_file/normimpute_RNAmix",format(Sys.time(), "%a_%b_%d"),"txt",sep = ".")
+log_file =paste("../../log_file/normimpute_RNAmix",format(Sys.time(), "%a_%b_%d"),"txt",sep = ".")
 cat(paste(format(Sys.time(), "%a %b %d %X %Y"), "start preprocessing...\n"), file = log_file, append = TRUE)
 ```
 
@@ -20,7 +20,7 @@ cat(paste(format(Sys.time(), "%a %b %d %X %Y"), "start preprocessing...\n"), fil
 # make a list of dataset for `Cellbench`
 
 ```{r}
-load("CellBench_data/data/mRNAmix_qc.RData")
+load("../../data/mRNAmix_qc.RData")
 
 sce2_qc$group = paste(sce2_qc$H2228_prop,sce2_qc$H1975_prop,sce2_qc$HCC827_prop)
 sce8_qc$group = paste(sce8_qc$H2228_prop,sce8_qc$H1975_prop,sce8_qc$HCC827_prop)
@@ -317,8 +317,8 @@ res2 <- res1 %>%
 ```
 
 ```{r}
-saveRDS(res1, file="/stornext/General/data/user_managed/grpu_mritchie_1/SCmixology/analysis_for_resubmit/rdata/RNAmix_all_after_normalization.Rds")
-saveRDS(res2, file="/stornext/General/data/user_managed/grpu_mritchie_1/SCmixology/analysis_for_resubmit/rdata/RNAmix_all_after_imputation.Rds")
+saveRDS(res1, file="../../rdata/RNAmix_all_after_normalization.Rds")
+saveRDS(res2, file="../../rdata/RNAmix_all_after_imputation.Rds")
 ```
 
 
