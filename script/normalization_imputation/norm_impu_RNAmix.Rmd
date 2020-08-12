@@ -221,6 +221,8 @@ norm_method <- list(
 library(SAVER)
 library(DrImpute)
 # source("knn-smoothing-master/knn_smooth.R")
+library(lamW)
+source("../../mysanity.R")
 
 no_impute = function(sce){
   tp = system.time({sce1=sce})
@@ -285,7 +287,6 @@ SAVER_impute = function(sce){
   return(sce)
 }
 
-source("../../mysanity.R")
 mysanity_impute = function(sce){
   tp = system.time({
     try_res = try({
