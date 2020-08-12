@@ -345,15 +345,22 @@ norm_evaluation <- list(
 res3 = res2 %>%
     apply_methods(norm_evaluation)
 
+is_task_error <- function(x) {
+    purrr::map_lgl(x, function(obj) is(obj, "task_error"))
+}
+res3_filtered <- res3 %>% 
+  dplyr::filter(!is_task_error(result)) %>%
+  dplyr::mutate(result = as.numeric(result)) %>%
+  dplyr::select(-norm_evaluation)
 ```
 
 
 ```{r}
-ggplot(data=res3,aes(x=norm_method,y=result,col=norm_method))+geom_boxplot()+theme_bw()
+ggplot(data=res3_filtered,aes(x=norm_method,y=result,col=norm_method))+geom_boxplot()+theme_bw()
 ```
 
 
 ```{r}
-ggplot(data=res3,aes(x=impute_method,y=result,col=norm_method,shape=norm_method))+geom_jitter(size=2,width = 0.2)+theme_bw()
+ggplot(data=res3_filtered,aes(x=impute_method,y=result,col=norm_method,shape=norm_method))+geom_jitter(size=2,width = 0.2)+theme_bw()
 ```
 
