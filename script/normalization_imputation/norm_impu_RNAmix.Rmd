@@ -257,7 +257,7 @@ norm_method <- list(
   LinnormRaw=linnormRaw_norm,
   LinnormXPM=linnormXPM_norm,
   scone=scone_norm,
-  SCnorm=SCnorm_norm,
+  # SCnorm=SCnorm_norm,  # TimeoutException
   log2=log2_norm
 )
 ```
