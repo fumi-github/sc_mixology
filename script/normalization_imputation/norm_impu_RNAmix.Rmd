@@ -136,7 +136,7 @@ logCPM_norm = function(sce){
 
 linnorm_norm = function(sce){
   tp = system.time({
-  logcounts(sce) = Linnorm(counts(sce))
+  logcounts(sce) = log2(exp(Linnorm(counts(sce))))
   })
   
   method_name = "Linnorm"
