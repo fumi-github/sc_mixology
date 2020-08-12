@@ -275,7 +275,12 @@ res = rbind(res,tmp)
 tmp = after_imputation %>% apply_methods(timing_method)
 clu_time = rbind(clu_time,tmp)
 
-after_imputation <- readRDS("/stornext/General/data/user_managed/grpu_mritchie_1/SCmixology/analysis_for_resubmit/rdata/final/RNAmix_all_after_imputation.Rds")
+is_task_error <- function(x) {
+  purrr::map_lgl(x, function(obj) is(obj, "task_error"))
+}
+
+after_imputation <- readRDS("rdata/RNAmix_all_after_imputation.Rds")
+after_imputation = after_imputation %>% dplyr::filter(!is_task_error(result))
 after_imputation = after_imputation[unlist(lapply(after_imputation$result, function(x){"logcounts" %in% assayNames(x)})),]
 after_imputation = after_imputation %>% apply_methods(hivar_method)
 after_imputation = after_imputation[,!(colnames(after_imputation) %in% c("hivar_method"))]
