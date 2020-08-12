@@ -220,7 +220,7 @@ norm_method <- list(
 ```{r}
 library(SAVER)
 library(DrImpute)
-source("knn-smoothing-master/knn_smooth.R")
+# source("knn-smoothing-master/knn_smooth.R")
 
 no_impute = function(sce){
   tp = system.time({sce1=sce})
@@ -234,20 +234,20 @@ no_impute = function(sce){
   return(sce1)
 }
 
-knn_smooth2 = function(sce){
-  tp = system.time({
-  logcounts(sce) = knn_smoothing(logcounts(sce), 16)
-  })
-  
-  method_name = "knn_smooth2"
-  method_type = "imputation"
-  if (!is.null(metadata(sce)$running_time)){
-    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
-  }else{
-    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
-  }
-  return(sce)
-}
+# knn_smooth2 = function(sce){
+#   tp = system.time({
+#   logcounts(sce) = knn_smoothing(logcounts(sce), 16)
+#   })
+#   
+#   method_name = "knn_smooth2"
+#   method_type = "imputation"
+#   if (!is.null(metadata(sce)$running_time)){
+#     metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+#   }else{
+#     metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+#   }
+#   return(sce)
+# }
 
 DrImpute_impute = function(sce){
   tp = system.time({
@@ -287,7 +287,7 @@ SAVER_impute = function(sce){
 
 impute_method <- list(
   no_impute=no_impute,
-  knn_smooth2=knn_smooth2,
+  # knn_smooth2=knn_smooth2,
   DrImpute=DrImpute_impute,
   SAVER=SAVER_impute
 )
