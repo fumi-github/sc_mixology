@@ -74,7 +74,7 @@ raw_count = function(sce){
 scran_norm = function(sce){
   tp = system.time({
   sce = computeSumFactors(sce)
-  sce = normalize(sce) # goes to `logcounts` by default
+  sce = logNormCounts(sce) # goes to `logcounts` by default
   })
   
   method_name = "scran"
@@ -90,7 +90,7 @@ scran_norm = function(sce){
 DESeq2_norm = function(sce){
   tp = system.time({
   sizeFactors(sce) <- estimateSizeFactorsForMatrix(counts(sce))
-  sce <- normalize(sce)
+  sce <- logNormCounts(sce)
   })
   
   method_name = "DESeq2"
@@ -106,7 +106,7 @@ DESeq2_norm = function(sce){
 TMM_norm = function(sce){
   tp = system.time({
   sizeFactors(sce) <- calcNormFactors(counts(sce), method = "TMM")
-  sce <- normalize(sce)
+  sce <- logNormCounts(sce)
   })
   
   method_name = "TMM"
