@@ -335,28 +335,6 @@ SAVER_impute = function(sce){
   return(sce)
 }
 
-mysanitymedian_impute = function(sce){
-  tp = system.time({
-    try_res = try({
-      logcounts(sce) = log2(mysanity(2^logcounts(sce)-1,
-                                     normalizemethod = "median")+1)
-    })
-  })
-  if (class(try_res) == "try-error") {
-    unname(tp)[1]=NA
-    print(try_res)
-  }
-  
-  method_name = "mysanitymedian"
-  method_type = "imputation"
-  if (!is.null(metadata(sce)$running_time)){
-    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
-  }else{
-    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
-  }
-  return(sce)
-}
-
 mysanitynone_impute = function(sce){
   tp = system.time({
     try_res = try({
@@ -384,7 +362,6 @@ impute_method <- list(
   # knn_smooth2=knn_smooth2,
   DrImpute=DrImpute_impute,
   SAVER=SAVER_impute,
-  mysanitymedian=mysanitymedian_impute,
   mysanitynone=mysanitynone_impute
 )
 ```
