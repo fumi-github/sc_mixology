@@ -272,6 +272,8 @@ norm_method <- list(
 
 # set the imputation methods
 
+Input is `normcounts` assay and output is `logcounts` assay.
+
 ```{r}
 library(SAVER)
 library(DrImpute)
@@ -279,9 +281,34 @@ library(DrImpute)
 library(lamW)
 source("../../mysanity.R")
 
-no_impute = function(sce){
-  tp = system.time({sce1=sce})
-  method_name = "no_imputation"
+# 
+addminnonzerothenlog2 = function (x) {
+  if (max(x) <= 0) {
+    x = x * 0 + 1
+  } else {
+    if (min(x) <= 0) {
+      x = x - min(x) + min(x[x > 0])
+    }
+  }
+  x = log2(x)
+  return(x)
+}
+
+addminnonzero_impute = function(sce){
+  tp = system.time({sce1=sce; logcounts(sce1)=addminnonzerothenlog2(normcounts(sce1))})
+  method_name = "addminnonzero"
+  method_type = "imputation"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce1)
+}
+
+addone_impute = function(sce){
+  tp = system.time({sce1=sce; logcounts(sce1)=addminnonzerothenlog2(normcounts(sce1)+1)})
+  method_name = "addone"
   method_type = "imputation"
   if (!is.null(metadata(sce)$running_time)){
     metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
@@ -293,7 +320,7 @@ no_impute = function(sce){
 
 # knn_smooth2 = function(sce){
 #   tp = system.time({
-#   logcounts(sce) = knn_smoothing(logcounts(sce), 16)
+#   logcounts(sce) = knn_smoothing(logcounts(sce), 16) # TODO change input to normcounts
 #   })
 #   
 #   method_name = "knn_smooth2"
@@ -308,7 +335,7 @@ no_impute = function(sce){
 
 DrImpute_impute = function(sce){
   tp = system.time({
-  logcounts(sce) <- DrImpute(logcounts(sce))
+  logcounts(sce) <- DrImpute(log(normcounts(sce)+1))
   })
   
   method_name = "DrImpute"
@@ -324,7 +351,7 @@ DrImpute_impute = function(sce){
 SAVER_impute = function(sce){
   tp = system.time({
     try_res = try({
-  logcounts(sce) = log2(saver(2^logcounts(sce)-1, ncores=1, size.factor=1, estimates.only = TRUE)+1)
+  logcounts(sce) = addminnonzerothenlog2(saver(normcounts(sce), ncores=1, size.factor=1, estimates.only = TRUE))
     })
   })
     if (class(try_res) == "try-error") {
@@ -345,8 +372,8 @@ SAVER_impute = function(sce){
 mysanitynone_impute = function(sce){
   tp = system.time({
     try_res = try({
-      logcounts(sce) = log2(mysanity(2^logcounts(sce)-1,
-                                     normalizemethod = "none")+1)
+      logcounts(sce) = addminnonzerothenlog2(mysanity(normcounts(sce),
+                                     normalizemethod = "none"))
     })
   })
   if (class(try_res) == "try-error") {
@@ -365,7 +392,8 @@ mysanitynone_impute = function(sce){
 }
 
 impute_method <- list(
-  no_impute=no_impute,
+  addminnonzero=addminnonzero_impute,
+  addone=addone_impute,
   # knn_smooth2=knn_smooth2,
   DrImpute=DrImpute_impute,
   SAVER=SAVER_impute,
