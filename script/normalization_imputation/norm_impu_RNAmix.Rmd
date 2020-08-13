@@ -47,6 +47,8 @@ gene_filter = function(sce){
 
 # set the normalization methods
 
+Input is `counts` assay and output is `normcounts` assay.
+
 ```{r}
 library(DESeq2)
 library(scran)
@@ -58,7 +60,7 @@ NUM_OF_THREAD=8
 
 raw_count = function(sce){
   tp = system.time({
-  logcounts(sce) = counts(sce)
+  normcounts(sce) = counts(sce)
   })
   
   method_name = "raw_count"
@@ -74,7 +76,7 @@ raw_count = function(sce){
 scran_norm = function(sce){
   tp = system.time({
   sce = computeSumFactors(sce)
-  sce = logNormCounts(sce) # goes to `logcounts` by default
+  sce = logNormCounts(sce, log=FALSE) # goes to `normcounts` by default
   })
   
   method_name = "scran"
@@ -90,7 +92,7 @@ scran_norm = function(sce){
 DESeq2_norm = function(sce){
   tp = system.time({
   sizeFactors(sce) <- estimateSizeFactorsForMatrix(counts(sce))
-  sce <- logNormCounts(sce)
+  sce <- logNormCounts(sce, log=FALSE)
   })
   
   method_name = "DESeq2"
@@ -106,7 +108,7 @@ DESeq2_norm = function(sce){
 TMM_norm = function(sce){
   tp = system.time({
   sizeFactors(sce) <- calcNormFactors(counts(sce), method = "TMM")
-  sce <- logNormCounts(sce)
+  sce <- logNormCounts(sce, log=FALSE)
   })
   
   method_name = "TMM"
@@ -119,12 +121,12 @@ TMM_norm = function(sce){
   return(sce)
 }
 
-logCPM_norm = function(sce){
+CPM_norm = function(sce){
   tp = system.time({
-  logcounts(sce) = log2(edgeR::cpm(counts(sce)) + 1)
+  normcounts(sce) = edgeR::cpm(counts(sce))
   })
   
-  method_name = "logCPM"
+  method_name = "CPM"
   method_type = "norm"
   if (!is.null(metadata(sce)$running_time)){
     metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
@@ -136,7 +138,7 @@ logCPM_norm = function(sce){
 
 linnorm_norm = function(sce){
   tp = system.time({
-  logcounts(sce) = log2(exp(Linnorm(counts(sce))))
+  normcounts(sce) = exp(Linnorm(counts(sce)))
   })
   
   method_name = "Linnorm"
@@ -151,7 +153,7 @@ linnorm_norm = function(sce){
 
 linnormRaw_norm = function(sce){
   tp = system.time({
-  logcounts(sce) = log2(Linnorm.Norm(counts(sce), output="Raw")+1)
+  normcounts(sce) = Linnorm.Norm(counts(sce), output="Raw")
   })
   
   method_name = "LinnormRaw"
@@ -166,7 +168,7 @@ linnormRaw_norm = function(sce){
 
 linnormXPM_norm = function(sce){
   tp = system.time({
-  logcounts(sce) = log2(Linnorm.Norm(counts(sce), output="XPM")+1)
+  normcounts(sce) = Linnorm.Norm(counts(sce), output="XPM")
   })
   
   method_name = "LinnormXPM"
@@ -184,7 +186,7 @@ SCnorm_norm = function(sce){
     try_res = try({
       withTimeout({
         SCnorm_out = SCnorm(Data=counts(sce),Conditions = rep(1,ncol(sce)),FilterCellNum = 10, NCores=NUM_OF_THREAD)
-        logcounts(sce) = log2(normcounts(SCnorm_out)+1)
+        normcounts(sce) = normcounts(SCnorm_out)
       },timeout = MAX_TIME, onTimeout="error")
     })
     if (class(try_res) == "try-error") {
@@ -219,7 +221,7 @@ scone_norm = function(sce){
                   bpparam = BiocParallel::SerialParam())
   out_norm = get_normalized(results,
                           method = rownames(get_params(results))[1])
-  logcounts(sce) = log2(out_norm + 1)
+  normcounts(sce) = out_norm
   })
   
   method_name = "scone"
@@ -232,12 +234,17 @@ scone_norm = function(sce){
   return(sce)
 }
 
-log2_norm = function(sce){
+median_norm = function(sce){
   tp = system.time({
-  logcounts(sce) = log2(counts(sce) + 1)
+    normcounts(sce) =
+      counts(sce) *
+      matrix(median(colSums(counts(sce))) / colSums(counts(sce)),
+             nrow = nrow(sce),
+             ncol = ncol(sce),
+             byrow = TRUE)
   })
   
-  method_name = "log2"
+  method_name = "median"
   method_type = "norm"
   if (!is.null(metadata(sce)$running_time)){
     metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
@@ -252,13 +259,13 @@ norm_method <- list(
   scran = scran_norm,
   DESeq2=DESeq2_norm,
   TMM=TMM_norm,
-  logCPM=logCPM_norm,
+  CPM=CPM_norm,
   Linnorm=linnorm_norm,
   LinnormRaw=linnormRaw_norm,
   LinnormXPM=linnormXPM_norm,
   scone=scone_norm,
   # SCnorm=SCnorm_norm,  # TimeoutException
-  log2=log2_norm
+  median=median_norm
 )
 ```
 
