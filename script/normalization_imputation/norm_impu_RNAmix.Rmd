@@ -339,7 +339,7 @@ mysanitymedian_impute = function(sce){
   tp = system.time({
     try_res = try({
       logcounts(sce) = log2(mysanity(2^logcounts(sce)-1,
-                                     normalizemethod == "median")+1)
+                                     normalizemethod = "median")+1)
     })
   })
   if (class(try_res) == "try-error") {
@@ -361,7 +361,7 @@ mysanitynone_impute = function(sce){
   tp = system.time({
     try_res = try({
       logcounts(sce) = log2(mysanity(2^logcounts(sce)-1,
-                                     normalizemethod == "none")+1)
+                                     normalizemethod = "none")+1)
     })
   })
   if (class(try_res) == "try-error") {
