@@ -434,6 +434,15 @@ res2 <- res1 %>%
     apply_methods(impute_method)
 ```
 
+Check imputation
+
+```{r}
+for (i in 1:nrow(res2)) {
+  print(min(logcounts(res2[i,4][[1]][[1]])))
+  # print(max(logcounts(res2[i,4][[1]][[1]])))
+}
+```
+
 ```{r}
 saveRDS(res1, file="../../rdata/RNAmix_all_after_normalization.Rds")
 saveRDS(res2, file="../../rdata/RNAmix_all_after_imputation.Rds")
