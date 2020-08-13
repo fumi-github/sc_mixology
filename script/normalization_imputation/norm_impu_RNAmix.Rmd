@@ -66,7 +66,7 @@ raw_count = function(sce){
   method_name = "raw_count"
   method_type = "norm"
   if (!is.null(metadata(sce)$running_time)){
-    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, type=method_type, time=unname(tp)[1]))
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
   }else{
     metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
   }
