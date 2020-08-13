@@ -388,6 +388,16 @@ res1 <- datasets %>%
     apply_methods(norm_method)
 ```
 
+Check normalization
+
+```{r}
+for (i in 1:nrow(res1)) {
+  # print(min(normcounts(res1[i,3][[1]][[1]])))
+  # print(max(normcounts(res1[i,3][[1]][[1]])))
+  print(summary(colSums(normcounts(res1[i,3][[1]][[1]]))))
+}
+```
+
 # apply imputation methods
 
 ```{r, warning=FALSE,message=FALSE}
