@@ -335,7 +335,7 @@ addone_impute = function(sce){
 
 DrImpute_impute = function(sce){
   tp = system.time({
-  logcounts(sce) <- DrImpute(log(normcounts(sce)+1), mc.cores=4)
+  logcounts(sce) <- DrImpute(log(normcounts(sce)+1), mc.cores=1)
   })
   
   method_name = "DrImpute"
@@ -351,7 +351,7 @@ DrImpute_impute = function(sce){
 SAVER_impute = function(sce){
   tp = system.time({
     try_res = try({
-  logcounts(sce) = addminnonzerothenlog2(saver(normcounts(sce), ncores=4, size.factor=1, estimates.only = TRUE))
+  logcounts(sce) = addminnonzerothenlog2(saver(normcounts(sce), ncores=1, size.factor=1, estimates.only = TRUE))
     })
   })
     if (class(try_res) == "try-error") {
