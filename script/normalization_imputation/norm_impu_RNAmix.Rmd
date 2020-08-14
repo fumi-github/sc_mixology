@@ -699,6 +699,24 @@ saveRDS(res1, file="../../rdata/RNAmix_all_after_normalization.Rds")
 saveRDS(res2, file="../../rdata/RNAmix_all_after_imputation.Rds")
 ```
 
+# apply posterior normalization
+
+```{r}
+res3a =
+  res2 %>%
+  apply_methods(norm2_method[c("none","median")])
+colnames(res3a)[4] = "norm2_method"
+res3b =
+  res2[res2$norm_method %in% c("none","median"), ] %>%
+  apply_methods(norm2_method[setdiff(names(norm2_method), c("none","median"))])
+colnames(res3b)[4] = "norm2_method"
+res3 = rbind(res3a, res3b)
+```
+
+```{r}
+saveRDS(res3, file="../../rdata/RNAmix_all_imputation_normalization.Rds")
+```
+
 
 # apply metrics for evaluation
 
