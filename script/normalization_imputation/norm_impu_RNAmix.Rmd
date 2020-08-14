@@ -401,6 +401,234 @@ impute_method <- list(
 )
 ```
 
+# set the posterior normalization methods
+
+Input and output are both `logcounts` assay.
+
+```{r}
+library(DESeq2)
+library(scran)
+library(edgeR)
+library(Linnorm)
+library(SCnorm)
+library(scone)
+NUM_OF_THREAD=8
+
+raw_count2 = function(sce){
+  tp = system.time({
+  sce1 = sce
+  })
+  
+  method_name = "raw_count"
+  method_type = "norm2"
+  if (!is.null(metadata(sce1)$running_time)){
+    metadata(sce1)$running_time = rbind(metadata(sce1)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce1)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce1)
+}
+
+scran_norm2 = function(sce){
+  tp = system.time({
+  counts(sce) = 2^logcounts(sce)
+  sce = computeSumFactors(sce)
+  sce = logNormCounts(sce) # goes to `logcounts` by default
+  })
+  
+  method_name = "scran"
+  method_type = "norm2"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce)
+}
+
+DESeq2_norm2 = function(sce){
+  tp = system.time({
+  counts(sce) = 2^logcounts(sce)
+  sizeFactors(sce) <- estimateSizeFactorsForMatrix(counts(sce))
+  sce <- logNormCounts(sce)
+  })
+  
+  method_name = "DESeq2"
+  method_type = "norm2"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce)
+}
+
+TMM_norm2 = function(sce){
+  tp = system.time({
+  counts(sce) = 2^logcounts(sce)
+  sizeFactors(sce) <- calcNormFactors(counts(sce), method = "TMM")
+  sce <- logNormCounts(sce)
+  })
+  
+  method_name = "TMM"
+  method_type = "norm2"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce)
+}
+
+CPM_norm2 = function(sce){
+  tp = system.time({
+  logcounts(sce) = log2(edgeR::cpm(2^logcounts(sce)))
+  })
+  
+  method_name = "CPM"
+  method_type = "norm2"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce)
+}
+
+linnorm_norm2 = function(sce){
+  tp = system.time({
+  logcounts(sce) = log2(exp(Linnorm(2^logcounts(sce))) - 1)
+  })
+  
+  method_name = "Linnorm"
+  method_type = "norm2"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce)
+}
+
+linnormRaw_norm2 = function(sce){
+  tp = system.time({
+  logcounts(sce) = log2(Linnorm.Norm(2^logcounts(sce), output="Raw"))
+  })
+  
+  method_name = "LinnormRaw"
+  method_type = "norm2"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce)
+}
+
+linnormXPM_norm2 = function(sce){
+  tp = system.time({
+  logcounts(sce) = log2(Linnorm.Norm(2^logcounts(sce), output="XPM"))
+  })
+  
+  method_name = "LinnormXPM"
+  method_type = "norm2"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce)
+}
+
+SCnorm_norm2 = function(sce){
+  tp = system.time({
+    try_res = try({
+      withTimeout({
+        SCnorm_out = SCnorm(Data=2^logcounts(sce),Conditions = rep(1,ncol(sce)),FilterCellNum = 10, NCores=NUM_OF_THREAD)
+        logcounts(sce) = log2(normcounts(SCnorm_out))
+      },timeout = MAX_TIME, onTimeout="error")
+    })
+    if (class(try_res) == "try-error") {
+    cat(paste(format(Sys.time(), "%a %b %d %X %Y. ERROR: "), print(try_res),"\n"), file = log_file, append = TRUE)
+    }
+  })
+  
+  method_name = "SCnorm"
+  method_type = "norm2"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  cat(paste(format(Sys.time(), "%a %b %d %X %Y. FINISHED: "), method_name, "   ", print(dim(sce)), "\n"), file = log_file, append = TRUE)
+  return(sce)
+}
+
+scone_norm2 = function(sce){
+  tp = system.time({
+  scaling=list(none=identity, # Identity - do nothing
+             sum = SUM_FN, # SCONE library wrappers...
+             tmm = TMM_FN, 
+             uq = UQ_FN,
+             fq = FQT_FN,
+             deseq = DESEQ_FN)
+  results = scone(SconeExperiment(2^logcounts(sce)), 
+                  scaling=scaling,
+                  run=TRUE, k_qc=0, k_ruv=0,
+                  return_norm = "in_memory",
+                  zero = "postadjust",
+                  bpparam = BiocParallel::SerialParam())
+  out_norm = get_normalized(results,
+                          method = rownames(get_params(results))[1])
+  logcounts(sce) = log2(out_norm)
+  })
+  
+  method_name = "scone"
+  method_type = "norm2"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce)
+}
+
+median_norm2 = function(sce){
+  tp = system.time({
+    logcounts(sce) =
+      log2(
+        (2^logcounts(sce)) *
+          matrix(median(colSums(2^logcounts(sce))) / colSums(2^logcounts(sce)),
+                 nrow = nrow(sce),
+                 ncol = ncol(sce),
+                 byrow = TRUE))
+  })
+  
+  method_name = "median"
+  method_type = "norm2"
+  if (!is.null(metadata(sce)$running_time)){
+    metadata(sce)$running_time = rbind(metadata(sce)$running_time, data.frame(method=method_name, method_type=method_type, time=unname(tp)[1]))
+  }else{
+    metadata(sce)$running_time = data.frame(method=method_name,method_type=method_type,time=unname(tp)[1])
+  }
+  return(sce)
+}
+
+norm2_method <- list(
+  none = raw_count2,
+  scran = scran_norm2,
+  DESeq2=DESeq2_norm2,
+  TMM=TMM_norm2,
+  CPM=CPM_norm2,
+  Linnorm=linnorm_norm2,
+  LinnormRaw=linnormRaw_norm2,
+  LinnormXPM=linnormXPM_norm2,
+  scone=scone_norm2,
+  # SCnorm=SCnorm_norm2,  # TimeoutException
+  median=median_norm2
+)
+```
+
 # apply gene filtering
 
 ```{r}
