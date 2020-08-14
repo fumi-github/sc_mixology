@@ -726,7 +726,8 @@ use silhouette distance and correlations within technical replications
 ```{r}
 library(cluster)
 silhouette_pca = function(sce){
-  sce = runPCA(sce)
+  logcounts(sce) = log2(2^logcounts(sce) + 1)
+  sce = runPCA(sce, scale = TRUE)
   sil = silhouette(as.numeric(factor(sce$group)),  dist(reducedDim(sce,"PCA")))
   return(mean(as.data.frame(sil[1:nrow(sil),])[,3]))
 }
